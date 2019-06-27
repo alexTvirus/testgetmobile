@@ -10,18 +10,16 @@ import Utils.AccountService;
 import Utils.Doc_file_kieu_txt;
 import Utils.WorkerThread;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import View.View;
-import java.util.Random;
 import Utils.Utils;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Controller {
 
-    public static int CountFinished = 1;
+    public static int CountFinished = 0;
     public static Object lock = new Object();
     public static int NUM_OF_THREAD = 2;
     public static final int INITIAL_DELAY = 10; // second
@@ -34,11 +32,11 @@ public class Controller {
         NUM_OF_THREAD = Integer.parseInt(View.jframe.txt_thread.getText());
         try {
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            for (int i = 0; i < lists.size() - 1; i++) {
+            for (int i = 0; i < lists.size(); i++) {
                 Runnable worker = new WorkerThread(lists.get(i).getPhoneNumber(), listIp.get(Utils.getRandomNumberInRange(0, listIp.size() - 1)));
-                executor.scheduleWithFixedDelay(worker, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
+//                executor.scheduleWithFixedDelay(worker, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
+                executor.schedule(worker, 300, TimeUnit.MILLISECONDS);
             }
-            executor.awaitTermination(30, TimeUnit.DAYS);
             executor.shutdown();
 
             // Wait until all threads are finish

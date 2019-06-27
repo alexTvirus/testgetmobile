@@ -7,8 +7,6 @@ package Utils;
 
 import SendURL.Controller;
 import SendURL.VNPT;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import View.View;
 import java.net.SocketTimeoutException;

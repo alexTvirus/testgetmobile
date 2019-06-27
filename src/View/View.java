@@ -6,9 +6,8 @@
 package View;
 
 import SendURL.Controller;
+import Utils.Doc_file_kieu_txt;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
@@ -149,6 +148,7 @@ public class View extends javax.swing.JFrame {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             PathFilePhone = file.getPath();
+            txt_total.setText(""+Doc_file_kieu_txt.readFile(PathFilePhone).size()); 
         } else {
             int clickrs = JOptionPane.showConfirmDialog(null, "Hãy chọn đường dẫn đến file chứa sdt");
             if (clickrs == JOptionPane.YES_OPTION) {
