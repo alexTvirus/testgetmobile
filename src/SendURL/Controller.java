@@ -23,7 +23,7 @@ public class Controller {
     public static int TotalInfo = 0;
 
     public void Start() {
-        List<AccountInfo> lists = AccountService.getAccountInfofromTxt(System.getProperty("user.dir") + "\\Account.txt");
+        List<AccountInfo> lists = AccountService.getAccountInfofromTxt(View.PathFilePhone);
         List<String> listIp = Doc_file_kieu_txt.readFile(System.getProperty("user.dir") + "\\ip.txt");
         TotalInfo = lists.size();
         View.jframe.txt_total.setText("" + lists.size());

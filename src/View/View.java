@@ -6,8 +6,10 @@
 package View;
 
 import SendURL.Controller;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
@@ -38,6 +40,7 @@ public class View extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         txt_rs = new javax.swing.JTextField();
         txt_total = new javax.swing.JTextField();
+        btn_file = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -52,6 +55,13 @@ public class View extends javax.swing.JFrame {
 
         jLabel1.setText("Thread");
 
+        btn_file.setText("Chọn file sdt");
+        btn_file.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_fileActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -59,12 +69,14 @@ public class View extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btn_start)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btn_start)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btn_file))
                     .addComponent(txt_rs, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txt_thread, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -81,12 +93,13 @@ public class View extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_start)
                     .addComponent(txt_thread, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(btn_file))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txt_rs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_total, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
+                .addContainerGap(39, Short.MAX_VALUE))
         );
 
         pack();
@@ -94,16 +107,49 @@ public class View extends javax.swing.JFrame {
 
     private void btn_startActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_startActionPerformed
         // TODO add your handling code here:
-        Thread jobThread = new Thread() {
-            @Override
-            public void run() {
-                Controller app = new Controller();
-                app.Start();
+        if (isFirst) {
+            if (!PathFilePhone.isEmpty()) {
+                Thread jobThread = new Thread() {
+                    @Override
+                    public void run() {
+                        Controller app = new Controller();
+                        app.Start();
 
+                    }
+                };
+                jobThread.start();
+                isFirst = false;
+            } else {
+                int clickrs = JOptionPane.showConfirmDialog(null, "Hãy chọn đường dẫn đến file chứa sdt");
+                if (clickrs == JOptionPane.YES_OPTION) {
+                    // Saving code here
+                }
+                if (clickrs == JOptionPane.NO_OPTION) {
+                    // Saving code here
+                }
             }
-        };
-        jobThread.start();
+
+        }
     }//GEN-LAST:event_btn_startActionPerformed
+
+    private void btn_fileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_fileActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fc = new JFileChooser();
+        fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        int returnVal = fc.showOpenDialog(View.this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            PathFilePhone = file.getPath();
+        } else {
+            int clickrs = JOptionPane.showConfirmDialog(null, "Hãy chọn đường dẫn đến file chứa sdt");
+            if (clickrs == JOptionPane.YES_OPTION) {
+                // Saving code here
+            }
+            if (clickrs == JOptionPane.NO_OPTION) {
+                // Saving code here
+            }
+        }
+    }//GEN-LAST:event_btn_fileActionPerformed
 
     /**
      * @param args the command line arguments
@@ -140,7 +186,7 @@ public class View extends javax.swing.JFrame {
             public void run() {
                 jframe = new View();
                 jframe.setVisible(true);
-                
+
                 jframe.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
                 jframe.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
@@ -156,8 +202,11 @@ public class View extends javax.swing.JFrame {
             }
         });
     }
+    private boolean isFirst = true;
+    public static String PathFilePhone;
     public static View jframe;
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btn_file;
     private javax.swing.JButton btn_start;
     private javax.swing.JLabel jLabel1;
     public javax.swing.JTextField txt_rs;
