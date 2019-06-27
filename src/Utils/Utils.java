@@ -5,6 +5,12 @@
  */
 package Utils;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,6 +20,20 @@ import java.util.Random;
  * @author Alex
  */
 public class Utils {
+
+    public static void writeFile(String content, String name) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(new BufferedWriter(new FileWriter(System.getProperty("user.dir") + "\\" + name, true)));
+            out.println(content);
+        } catch (IOException e) {
+            System.err.println(e);
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
 
     public static int getRandomNumberInRange(int min, int max) {
         if (min > max) {

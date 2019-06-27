@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import View.View;
+import java.net.SocketTimeoutException;
 
 public class WorkerThread implements Runnable {
 
@@ -37,14 +38,15 @@ public class WorkerThread implements Runnable {
             VNPT obj = new VNPT();
             obj.Create(phonenumber, ip);
             Controller.CountFinished++;
-            Controller.TotalInfo--;
-            System.out.println(ip);
             View.jframe.txt_rs.setText("" + Controller.CountFinished);
+            View.jframe.lb_rs.setText("sdt đã xử lý: " + phonenumber);
         } catch (Exception ex) {
             if (ex instanceof OverloadSystemException) {
                 JOptionPane.showConfirmDialog(null, ((OverloadSystemException) ex).getMessage());
                 System.out.println(((OverloadSystemException) ex).getMessage());
                 System.exit(0);
+            } else if (ex instanceof SocketTimeoutException) {
+                System.out.println("time out");
             } else {
                 JOptionPane.showConfirmDialog(null, ex.getMessage());
                 System.exit(0);

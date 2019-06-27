@@ -41,6 +41,7 @@ public class View extends javax.swing.JFrame {
         txt_rs = new javax.swing.JTextField();
         txt_total = new javax.swing.JTextField();
         btn_file = new javax.swing.JButton();
+        lb_rs = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -70,21 +71,26 @@ public class View extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btn_start)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_file))
-                    .addComponent(txt_rs, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(lb_rs, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txt_thread, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(22, 22, 22))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(txt_total)
-                        .addContainerGap())))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btn_start)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btn_file))
+                            .addComponent(txt_rs, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txt_thread, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(22, 22, 22))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(txt_total)
+                                .addContainerGap())))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -99,7 +105,9 @@ public class View extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txt_rs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_total, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(39, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lb_rs, javax.swing.GroupLayout.DEFAULT_SIZE, 17, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -107,8 +115,16 @@ public class View extends javax.swing.JFrame {
 
     private void btn_startActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_startActionPerformed
         // TODO add your handling code here:
-        if (isFirst) {
-            if (!PathFilePhone.isEmpty()) {
+        if (PathFilePhone.isEmpty()) {
+            int clickrs = JOptionPane.showConfirmDialog(null, "Hãy chọn đường dẫn đến file chứa sdt");
+            if (clickrs == JOptionPane.YES_OPTION) {
+                // Saving code here
+            }
+            if (clickrs == JOptionPane.NO_OPTION) {
+                // Saving code here
+            }
+        } else {
+            if (isFirst) {
                 Thread jobThread = new Thread() {
                     @Override
                     public void run() {
@@ -119,17 +135,10 @@ public class View extends javax.swing.JFrame {
                 };
                 jobThread.start();
                 isFirst = false;
-            } else {
-                int clickrs = JOptionPane.showConfirmDialog(null, "Hãy chọn đường dẫn đến file chứa sdt");
-                if (clickrs == JOptionPane.YES_OPTION) {
-                    // Saving code here
-                }
-                if (clickrs == JOptionPane.NO_OPTION) {
-                    // Saving code here
-                }
-            }
 
+            }
         }
+
     }//GEN-LAST:event_btn_startActionPerformed
 
     private void btn_fileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_fileActionPerformed
@@ -203,12 +212,13 @@ public class View extends javax.swing.JFrame {
         });
     }
     private boolean isFirst = true;
-    public static String PathFilePhone;
+    public static String PathFilePhone="";
     public static View jframe;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_file;
     private javax.swing.JButton btn_start;
     private javax.swing.JLabel jLabel1;
+    public javax.swing.JLabel lb_rs;
     public javax.swing.JTextField txt_rs;
     public javax.swing.JTextField txt_thread;
     public javax.swing.JTextField txt_total;

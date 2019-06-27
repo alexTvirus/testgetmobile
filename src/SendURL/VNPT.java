@@ -7,6 +7,7 @@ package SendURL;
 
 import Utils.OverloadSystemException;
 import Utils.Utils;
+import View.View;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -29,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -53,15 +55,18 @@ import org.apache.commons.lang3.StringUtils;
 public class VNPT {
 
     private String UrlImg = "";
-    private String token = "";
+    private static String token = "";
     private final String USER_AGENT
             = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";
     private String ip = "";
+    private String phone = "";
     public static CookieManager msCookieManager = new CookieManager();
     public static String filename = "";
+    public static String result = "";
+    public int counter = 1;
 
     static {
-        CookieHandler.setDefault(msCookieManager); 
+        CookieHandler.setDefault(msCookieManager);
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
         filename = sdf.format(timestamp) + "result.txt";
@@ -75,22 +80,68 @@ public class VNPT {
 
     public void Create(String phonenumber, String ip) throws Exception {
         this.ip = ip;
+        this.phone = phonenumber;
         if (isFirst) {
             getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
-            dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
+            String x2 = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
+            counter = 0;
+            while (x2.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")) {
+                System.out.println("1");
+                Utils.writeFile("1", "error.txt");
+                getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
+                x2 = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
+                counter++;
+                if (counter == 100) {
+                    break;
+                }
+            }
+
+            String x3 = getCookies("http://" + ip + "/b9_cskh/presentation/cm/utility/TIENICH-5.1.1-TrangThaiTongDai.xhtml", "GET");
+            counter = 0;
+            while (x3.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")) {
+                Utils.writeFile("2", "error.txt");
+                getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
+                x3 = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
+                counter++;
+                if (counter == 100) {
+                    break;
+                }
+            }
+            if (!x3.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")) {
+                getCookies("http://" + ip + "/b9_cskh/presentation/cm/utility/TIENICH-5.1.1-TrangThaiTongDai.xhtml", "GET");
+            }
             isFirst = false;
         }
-
-        getCookies("http://" + ip + "/b9_cskh/presentation/cm/utility/TIENICH-5.1.1-TrangThaiTongDai.xhtml", "GET");
+//        PresendPost(phonenumber);
         String response = sendPost(phonenumber, "", "");
-        if (!response.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")) {
-            saveInfomation(response, filename);
-        } else {
-            throw new OverloadSystemException("Hệ thống đang quá tải vui lòng chờ trong giây lát");
+        counter = 0;
+        while (true) {
+            if (!response.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")
+                    || !response.contains("<form id=\"frm_login\" name=\"frm_login\"")
+                    || !response.contains("<![CDATA[<form id=\"frm_login\" name=\"frm_login\"")
+                    || !response.contains("Vui lòng nhấn F5 để load lại")) {
+                saveInfomation(response, filename);
+                break;
+            }
+
+            while (response.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")
+                    || response.contains("<![CDATA[<form id=\"frm_login\" name=\"frm_login\"")
+                    || response.contains("<form id=\"frm_login\" name=\"frm_login\"")
+                    || response.contains("Vui lòng nhấn F5 để load lại")) {
+                getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
+                response = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
+                counter++;
+                if (counter == 400) {
+                    break;
+                }
+                Utils.writeFile("3", "error.txt");
+                System.out.println("3");
+            }
+            response = sendPost(phonenumber, "", "");
         }
     }
 
-    private void getCookies(String url, String Method) throws Exception {
+    private String getCookies(String url, String Method) throws Exception {
 
         URL obj = new URL(url);
         HttpURLConnection con = null;
@@ -102,7 +153,7 @@ public class VNPT {
         }
 
         con.setRequestMethod(Method);
-
+        con.setConnectTimeout(2000);
         //add request header
         String StringCookies = StringUtils.join(msCookieManager.getCookieStore().getCookies(), ";");
         con.setRequestProperty("User-Agent", USER_AGENT);
@@ -138,9 +189,10 @@ public class VNPT {
         if (matcher.find()) {
             token = matcher.group(1);
         }
+        return response.toString();
     }
 
-    private void dangNhap(String url, String Method, String token) throws Exception {
+    private String dangNhap(String url, String Method, String token) throws Exception {
 
         URL obj = new URL(url);
         HttpURLConnection con = null;
@@ -150,7 +202,7 @@ public class VNPT {
         } else {
             con = (HttpsURLConnection) obj.openConnection();
         }
-
+        con.setConnectTimeout(2000);
         // optional default is GET
         String urlParameters
                 = "javax.faces.partial.ajax=true"
@@ -161,7 +213,8 @@ public class VNPT {
                 + "&frm_login=frm_login"
                 + "&javax.faces.ViewState=" + token
                 + "&frm_login%3Ausername=c1_thphuong_01_dl"
-                + "&frm_login%3Apassword=hanoi123";
+                + "&frm_login%3Apassword=hanoi123"
+                + "&frm_login%3Aj_idt18_input=on";
 
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
         int postDataLength = postData.length;
@@ -197,7 +250,7 @@ public class VNPT {
             response.append(inputLine);
         }
         in.close();
-
+        return response.toString();
     }
 
     private String sendPost(String IsdnId, String shopIdFull, String shopId) throws MalformedURLException, IOException {
@@ -205,7 +258,7 @@ public class VNPT {
         String url = "http://" + ip + "/b9_cskh/presentation/cm/utility/TIENICH-5.1.1-TrangThaiTongDai.xhtml";
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
+        con.setConnectTimeout(2000);
         String urlParameters
                 = "javax.faces.partial.ajax=true"
                 + "&javax.faces.source=formMain%3Aj_idt145"
@@ -230,9 +283,13 @@ public class VNPT {
         //add reuqest header
         con.setRequestMethod("POST");
         con.setRequestProperty("Cookie", StringCookies);
+        con.setRequestProperty("Accept", "application/xml, text/xml, */*; q=0.01");
+        con.setRequestProperty("Accept-Language", "vi,en-GB;q=0.8,en;q=0.6");
+        con.setRequestProperty("Accept-Encoding", "gzip, deflate");
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Cookie", StringCookies);
+        con.setRequestProperty("X-Requested-With", "XMLHttpRequest");
         con.setRequestProperty("origin", "http://" + ip);
+        con.setRequestProperty("Host", ip);
         con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
         con.setRequestProperty("Faces-Request", "partial/ajax");
         con.setRequestProperty("Referer", "http://" + ip + "/b9_cskh/presentation/cm/utility/TIENICH-5.1.1-TrangThaiTongDai.xhtml?jftfdi=&jffi=%2Fpresentation%2Fcm%2Futility%2FTIENICH-5.1.1-TrangThaiTongDai.xhtml");
@@ -272,14 +329,16 @@ public class VNPT {
                 temp = temp[1].split("</textarea>", 2);
                 infomation = StringEscapeUtils.unescapeHtml4("Msisdn" + temp[0]);
             } else {
-                throw new OverloadSystemException("Hệ thống đang quá tải vui lòng chờ trong giây lát");
+                System.out.println(content);
+                Utils.writeFile(content, "error.txt");
+                throw new OverloadSystemException("Hệ thống đang quá tải vui lòng chờ trong giây lát--");
             }
 
 //        if (matcher.find()) {
 //            infomation = content.substring(matcher.start(), matcher.end()).replaceAll("<\\/textarea>", "");
 //        }
             StringBuffer sb = new StringBuffer(infomation);
-
+            sb.insert(0, phone + ",");
             if (sb.indexOf("Profile") != -1) {
                 sb.insert(sb.indexOf("Profile"), ",");
             }
@@ -325,27 +384,13 @@ public class VNPT {
             if (sb.indexOf("Amount") != -1) {
                 sb.insert(sb.indexOf("Amount") + 6, ",");
             }
-            writeFile(sb.toString(), filename);
+            Utils.writeFile(sb.toString(), filename);
         } else {
             String[] temp = content.split("msisdn=", 2);
             if (temp.length >= 2) {
                 temp[1] = temp[1].substring(0, 8);
             }
-            writeFile(temp[1] + "-ACCOUNT NOT FOUND", filename);
-        }
-    }
-
-    public void writeFile(String content, String name) throws FileNotFoundException, UnsupportedEncodingException, IOException {
-        PrintWriter out = null;
-        try {
-            out = new PrintWriter(new BufferedWriter(new FileWriter(System.getProperty("user.dir") + "\\" + name, true)));
-            out.println(content);
-        } catch (IOException e) {
-            System.err.println(e);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
+            Utils.writeFile(temp[1] + "-ACCOUNT NOT FOUND", filename);
         }
     }
 
