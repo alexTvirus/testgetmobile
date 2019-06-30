@@ -35,6 +35,7 @@ public class Controller {
             for (int i = 0; i < lists.size(); i++) {
                 Runnable worker = new WorkerThread(lists.get(i).getPhoneNumber(), listIp.get(Utils.getRandomNumberInRange(0, listIp.size() - 1)));
 //                executor.scheduleWithFixedDelay(worker, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
+                View.jframe.lb_rs.setText("đang khởi tạo ..." + (i+1));
                 executor.schedule(worker, 300, TimeUnit.MILLISECONDS);
             }
             executor.shutdown();

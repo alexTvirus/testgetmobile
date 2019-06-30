@@ -41,14 +41,15 @@ public class WorkerThread implements Runnable {
         } catch (Exception ex) {
             if (ex instanceof OverloadSystemException) {
                 JOptionPane.showConfirmDialog(null, ((OverloadSystemException) ex).getMessage());
-                System.out.println(((OverloadSystemException) ex).getMessage());
+                //System.out.println(((OverloadSystemException) ex).getMessage());
                 System.exit(0);
             } else if (ex instanceof SocketTimeoutException) {
+                View.jframe.lb_rs.setText("time out kết nối ..." );
                 System.out.println("time out");
             } else {
                 JOptionPane.showConfirmDialog(null, ex.getMessage());
-                System.exit(0);
                 System.out.println(ex.getMessage());
+               // System.exit(0);
             }
 
         }

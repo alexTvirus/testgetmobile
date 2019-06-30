@@ -73,11 +73,11 @@ public class VNPT {
         this.ip = ip;
         this.phone = phonenumber;
         if (isFirst) {
-            getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
+            preDangNhap("http://" + ip + "/b9_cskh/login.xhtml", "GET");
             String x2 = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
             counter = 0;
             while (x2.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")) {
-                getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
+                preDangNhap("http://" + ip + "/b9_cskh/login.xhtml", "GET");
                 x2 = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
                 counter++;
                 View.jframe.lb_rs.setText("đang kết nối ..." + counter);
@@ -91,7 +91,7 @@ public class VNPT {
 
             while (x3.contains("Hệ thống đang quá tải vui lòng chờ trong giây lát")) {
                 Utils.writeFile("2", "error.txt");
-                getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
+                preDangNhap("http://" + ip + "/b9_cskh/login.xhtml", "GET");
                 x3 = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
                 counter++;
                 View.jframe.lb_rs.setText("đang kết nối ..." + counter);
@@ -120,14 +120,13 @@ public class VNPT {
                     || response.contains("<![CDATA[<form id=\"frm_login\" name=\"frm_login\"")
                     || response.contains("<form id=\"frm_login\" name=\"frm_login\"")
                     || response.contains("Vui lòng nhấn F5 để load lại")) {
-                getCookies("http://" + ip + "/b9_cskh/login.xhtml", "GET");
+                preDangNhap("http://" + ip + "/b9_cskh/login.xhtml", "GET");
                 response = dangNhap("http://" + ip + "/b9_cskh/login.xhtml", "POST", token);
                 counter++;
                 View.jframe.lb_rs.setText("đang kết nối ..." + counter);
                 if (counter == 300) {
                     throw new OverloadSystemException("Hệ thống đang quá tải vui lòng chờ trong giây lát--");
                 }
-                System.out.println("3");
             }
             response = sendPost(phonenumber, "", "");
         }
@@ -192,6 +191,54 @@ public class VNPT {
         }
     }
 
+    private String preDangNhap(String url, String Method) throws Exception {
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection con = null;
+            String pro = obj.getProtocol();
+            if (pro.equals("http")) {
+                con = (HttpURLConnection) obj.openConnection();
+            } else {
+                con = (HttpsURLConnection) obj.openConnection();
+            }
+
+            con.setRequestMethod(Method);
+            con.setConnectTimeout(2000);
+            //add request header
+            String StringCookies = StringUtils.join(msCookieManager.getCookieStore().getCookies(), ";");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            con.setRequestProperty("Host", ip);
+            con.setRequestProperty("Cookie", StringCookies);
+
+            int responseCode = con.getResponseCode();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            Pattern pattern = Pattern.compile(
+                    "<input\\s{1,3}type=\"hidden\"\\s{1,3}name=\"javax.faces.ViewState\"\\s{1,3}id=\"j_id1:javax.faces.ViewState:0\"\\s{1,3}value=\"(.*?)\"(.*?)>");
+            Matcher matcher = pattern.matcher(response.toString());
+            if (matcher.find()) {
+                token = matcher.group(1);
+            }
+            return response.toString();
+        } catch (Exception e) {
+            if (e instanceof SocketTimeoutException) {
+                Utils.writeFile("sdt loi timeout: " + phone, "error.txt");
+                throw new SocketTimeoutException();
+            } else {
+                throw e;
+            }
+        }
+    }
+
     private String dangNhap(String url, String Method, String token) throws Exception {
         try {
             URL obj = new URL(url);
@@ -218,8 +265,6 @@ public class VNPT {
 
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
             int postDataLength = postData.length;
-
-            String StringCookies = StringUtils.join(msCookieManager.getCookieStore().getCookies(), ";");
 
             //add reuqest header
             con.setRequestMethod("POST");
@@ -335,77 +380,7 @@ public class VNPT {
     }
 
     private void saveInfomation(String content, String filename) throws UnsupportedEncodingException, IOException, OverloadSystemException {
-//        Pattern pattern = Pattern.compile(
-//                "Msisdn((.|\\n|\\r)+)<\\/textarea>");
-//        Matcher matcher = pattern.matcher(content);
-        if (!content.contains("ACCOUNT NOT FOUND")) {
-            String[] temp = content.split("Msisdn", 2);
-            String infomation = "";
-            if (temp.length >= 2) {
-                temp = temp[1].split("</textarea>", 2);
-                infomation = StringEscapeUtils.unescapeHtml4("Msisdn" + temp[0]);
-            } else {
-                throw new OverloadSystemException("Hệ thống đang quá tải vui lòng chờ trong giây lát--");
-            }
-
-//        if (matcher.find()) {
-//            infomation = content.substring(matcher.start(), matcher.end()).replaceAll("<\\/textarea>", "");
-//        }
-            StringBuffer sb = new StringBuffer(infomation);
-            sb.insert(0, phone + ",");
-            if (sb.indexOf("Profile") != -1) {
-                sb.insert(sb.indexOf("Profile"), ",");
-            }
-            if (sb.indexOf("Units Available") != -1) {
-                sb.insert(sb.indexOf("Units Available"), ",");
-            }
-            if (sb.indexOf("Refill Error ICC") != -1) {
-                sb.insert(sb.indexOf("Refill Error ICC"), ",");
-            }
-            if (sb.indexOf("First Call Date") != -1) {
-                sb.insert(sb.indexOf("First Call Date"), ",");
-            }
-            if (sb.indexOf("Beg. Validation Date") != -1) {
-                sb.insert(sb.indexOf("Beg. Validation Date"), ",");
-            }
-            if (sb.indexOf("Bonus Account") != -1) {
-                sb.insert(sb.indexOf("Bonus Account"), ",");
-            }
-            if (sb.indexOf("Day before Deactive") != -1) {
-                sb.insert(sb.indexOf("Day before Deactive"), ",");
-            }
-            if (sb.indexOf("Account Block") != -1) {
-                sb.insert(sb.indexOf("Account Block"), ",");
-            }
-            if (sb.indexOf("Recharge & Bonus Units") != -1) {
-                sb.insert(sb.indexOf("Recharge & Bonus Units"), ",");
-            }
-            if (sb.indexOf("Allow P2P") != -1) {
-                sb.insert(sb.indexOf("Allow P2P"), ",");
-            }
-            if (sb.indexOf("City Location 2") != -1) {
-                sb.insert(sb.indexOf("City Location 2"), ",");
-            }
-            if (sb.indexOf("City Location 4") != -1) {
-                sb.insert(sb.indexOf("City Location 4"), ",");
-            }
-            if (sb.indexOf("CALL HISTORY") != -1) {
-                sb.insert(sb.indexOf("CALL HISTORY"), ",");
-            }
-            if (sb.indexOf("Call Type") != -1) {
-                sb.insert(sb.indexOf("Call Type"), ",");
-            }
-            if (sb.indexOf("Amount") != -1) {
-                sb.insert(sb.indexOf("Amount") + 6, ",");
-            }
-            Utils.writeFile(sb.toString(), filename);
-        } else {
-            String[] temp = content.split("msisdn=", 2);
-            if (temp.length >= 2) {
-                temp[1] = temp[1].substring(0, 8);
-            }
-            Utils.writeFile(temp[1] + "-ACCOUNT NOT FOUND", filename);
-        }
+        Utils.writeFile(Utils.getStringInforCsv(content, phone).toString(), filename);
     }
 
 }
