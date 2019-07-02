@@ -51,7 +51,7 @@ public class View extends javax.swing.JFrame {
             }
         });
 
-        txt_thread.setText("1");
+        txt_thread.setText("5");
 
         jLabel1.setText("Thread");
 

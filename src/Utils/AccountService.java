@@ -20,8 +20,15 @@ public class AccountService {
                 for (int i = 0; i < lists.size(); i++) {
                     if (!lists.get(i).equals("") && !lists.get(i).equals(" ")) {
                         AccountInfo info = new AccountInfo();
-                        info.setPhoneNumber(lists.get(i).trim().replaceAll("\\s{2,}", ""));
-                        listInfo.add(info);
+                        String[] temp = lists.get(i).split(":", 2);
+                        if (temp.length == 2) {
+                            info.setUser(temp[0]);
+                            info.setPass(temp[1]);
+                            listInfo.add(info);
+                        } else {
+                            info.setPhoneNumber(lists.get(i).trim().replaceAll("\\s{2,}", ""));
+                            listInfo.add(info);
+                        }
                     }
                 }
             }
