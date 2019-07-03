@@ -9,24 +9,21 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  *
  * @author Alex
  */
 public class Utils {
-
-    
 
     // lay ra 3 sdt trong historycall
     public static List<String> getHistoryDate(String Content) {
@@ -54,8 +51,14 @@ public class Utils {
     public synchronized static void writeFile(String content, String name) throws FileNotFoundException, UnsupportedEncodingException, IOException {
         PrintWriter out = null;
         try {
-            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(System.getProperty("user.dir") + "\\" + name, true), StandardCharsets.UTF_8)));
+            OutputStream os = new FileOutputStream(System.getProperty("user.dir") + "\\" + name,true);
+            os.write(239);
+            os.write(187);
+            os.write(191);
+
+            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(os, "UTF-8")));
             out.println(content);
+
         } catch (IOException e) {
             System.err.println(e);
         } finally {

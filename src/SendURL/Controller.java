@@ -22,8 +22,6 @@ public class Controller {
     public static int CountFinished = 0;
     public static Object lock = new Object();
     public static int NUM_OF_THREAD = 3;
-    public static final int INITIAL_DELAY = 10; // second
-    public static final int DELAY = 1000; // second
 
     public void Start() {
         List<AccountInfo> lists = AccountService.getAccountInfofromTxt(View.PathFilePhone);
